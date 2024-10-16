@@ -18,14 +18,14 @@ class BaiduWenxinBot(Bot):
 
     def __init__(self):
         super().__init__()
-        wenxin_model = conf().get("baidu_wenxin_model")
+        wenxin_model = conf().get("baidu_wenxin_model").lower()
         self.prompt_enabled = conf().get("baidu_wenxin_prompt_enabled")
         if self.prompt_enabled:
             self.prompt = conf().get("character_desc", "")
             if self.prompt == "":
                 logger.warn("[BAIDU] Although you enabled model prompt, character_desc is not specified.")
         if wenxin_model is not None:
-            wenxin_model = conf().get("baidu_wenxin_model") or "eb-instant"
+            wenxin_model = conf().get("baidu_wenxin_model").lower() or "eb-instant"
         else:
             if conf().get("model") and conf().get("model") == const.WEN_XIN:
                 wenxin_model = "completions"

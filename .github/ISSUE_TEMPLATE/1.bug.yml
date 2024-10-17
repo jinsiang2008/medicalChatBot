@@ -55,10 +55,7 @@ body:
         经过长时间的观察，我们认为`python 3.8`是兼容性最好的版本。
         `python 3.7`~`python 3.10`以外版本的issue，将视情况直接关闭。
       options:
-        - python 3.7
         - python 3.8
-        - python 3.9
-        - python 3.10
         - other
     validations:
       required: true

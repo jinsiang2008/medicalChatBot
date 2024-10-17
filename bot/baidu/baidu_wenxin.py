@@ -93,6 +93,17 @@ class BaiduWenxinBot(Bot):
             response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
             response_text = json.loads(response.text)
             logger.info(f"[BAIDU] response text={response_text}")
+            
+            if 'error_code' in response_text and response_text['error_code'] != 0:
+                error_code = response_text['error_code']
+                error_msg = response_text['error_msg']
+                logger.error(f"[BAIDU] error_code={error_code}, error_msg={error_msg}")
+                return {
+                    "total_tokens": 0,
+                    "completion_tokens": 0,
+                    "content": f"出错了: {error_msg}"
+                }
+
             res_content = response_text["result"]
             total_tokens = response_text["usage"]["total_tokens"]
             completion_tokens = response_text["usage"]["completion_tokens"]
@@ -102,13 +113,21 @@ class BaiduWenxinBot(Bot):
                 "completion_tokens": completion_tokens,
                 "content": res_content,
             }
-        except Exception as e:
-            need_retry = retry_count < 2
-            logger.warn("[BAIDU] Exception: {}".format(e))
-            need_retry = False
-            self.sessions.clear_session(session.session_id)
-            result = {"total_tokens": 0, "completion_tokens": 0, "content": "出错了: {}".format(e)}
-            return result
+
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"[BAIDU] Connection error: {e}")
+            return {
+                "total_tokens": 0,
+                "completion_tokens": 0,
+                "content": "Connection error",
+            }
+        except requests.exceptions.ConnectTimeout as e:
+            logger.error(f"[BAIDU] Connection timeout: {e}")
+            return {
+                "total_tokens": 0,
+                "completion_tokens": 0,
+                "content": "Connection timeout",
+            }
 
     def get_access_token(self):
         """

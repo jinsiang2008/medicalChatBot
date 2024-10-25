@@ -167,9 +167,17 @@ class ChatChannel(Channel):
             return
         logger.debug("[chat_channel] ready to handle context: {}".format(context))
         # reply的构建步骤
-        reply = self._generate_reply(context)
-
-        logger.debug("[chat_channel] ready to decorate reply: {}".format(reply))
+        try:
+            reply = self._generate_reply(context)
+            logger.debug("[chat_channel] ready to decorate reply: {}".format(reply))
+            if reply is None:
+                logger.error("Reply is None")
+                return
+            if reply.type == ReplyType.ERROR:
+                logger.error("Reply is Error")
+                return
+        except Exception as e:
+            logger.error("[chat_channel] handle error: {}".format(str(e)))
 
         # reply的包装步骤
         if reply and reply.content:

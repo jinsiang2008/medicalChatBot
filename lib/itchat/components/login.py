@@ -360,13 +360,21 @@ def sync_check(self):
     except requests.exceptions.ConnectTimeout as e:
         logger.error(f"Connection timeout: {e}")
         return "Connection timeout"
+    except requests.exceptions.ReadTimeout as e:
+        logger.error(f"Read timeout: {e}")
+        return "Read timeout"
+    except BadStatusLine as e:
+        logger.error(f"BadStatusLine error: {e}")
+        return "BadStatusLine error"
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         try:
-            if not isinstance(e.args[0].args[1], BadStatusLine):
+            if len(e.args) > 0 and isinstance(e.args[0], tuple) and len(e.args[0]) > 1 and isinstance(e.args[0][1], BadStatusLine):
                 logger.error("BadStatusLine error")
         except IndexError:
             logger.error("IndexError: tuple index out of range")
+        except Exception as inner_e:
+            logger.error(f"Another unexpected error: {inner_e}")
         return "Unexpected error"
 
     r.raise_for_status()
